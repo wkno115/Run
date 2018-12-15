@@ -84,7 +84,7 @@ public class Player : MonoBehaviour
         playerPos = transform.position;
         nowJumpping = false;
 
-        transform.LookAt(lookedAtSphere);
+        //transform.LookAt(lookedAtSphere);
 
         StartCoroutine(updateMotion());
     }
@@ -100,9 +100,6 @@ public class Player : MonoBehaviour
 
             if (direction.magnitude > 0.001f)
             {
-                // directionのX軸とZ軸の方向を向かせる
-                transform.rotation = Quaternion.LookRotation(new Vector3
-                    (direction.x, 0, direction.z));
                 //走るアニメーションを再生
                 animator.SetBool("Running", true);
             }
@@ -118,13 +115,14 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        float vx = Input.GetAxisRaw("Horizontal") * Time.deltaTime * MAX_VELOCITY_X;
-
         //W・Sキー、↑↓キーで前後移動
-        float vz = Input.GetAxisRaw("Vertical") * Time.deltaTime * MAX_VELOCITY_Z;
+        float v = Input.GetAxisRaw("Vertical") * Time.deltaTime * MAX_VELOCITY_Z;
 
         //現在の位置＋入力した数値の場所に移動する
-        rb.MovePosition(transform.position + new Vector3(vx, 0, vz));
+        rb.MovePosition(transform.position + transform.forward*v);
+
+        //姿勢を変更
+        transform.Rotate(0, Input.GetAxisRaw("Horizontal"), 0, Space.World);
 
         //ユニティちゃんの位置を更新する
         playerPos = transform.position;
