@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 using DG.Tweening;
+using System;
 
 public class Player : MonoBehaviour
 {
@@ -11,13 +12,9 @@ public class Player : MonoBehaviour
     /// </summary>
     readonly float ACCELARATION = 0.01f;
     /// <summary>
-    /// 最大X速度
-    /// </summary>
-    readonly float MAX_VELOCITY_X = 3f;
-    /// <summary>
     /// 最大Z速度
     /// </summary>
-    readonly float MAX_VELOCITY_Z = 3f;
+    readonly float MAX_VELOCITY_Z = 1f;
 
     /// <summary>
     /// x,zの速度差分
@@ -55,10 +52,14 @@ public class Player : MonoBehaviour
     /// </summary>
     bool nowJumpping;
 
+    /// <summary>
+    /// ジャンプ処理
+    /// </summary>
+    /// <returns>処理中</returns>
     IEnumerator Jump()
     {
         nowJumpping = true;
-        rb.AddForce(transform.up * jumpForce,ForceMode.Impulse);
+        rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         //ジャンプのアニメーションをオンにする
         animator.SetBool("Jumping", true);
         while (true)
@@ -83,10 +84,6 @@ public class Player : MonoBehaviour
         //ユニティちゃんの現在より少し前の位置を保存
         playerPos = transform.position;
         nowJumpping = false;
-
-        //transform.LookAt(lookedAtSphere);
-
-        StartCoroutine(updateMotion());
     }
 
     IEnumerator updateMotion()
@@ -102,6 +99,7 @@ public class Player : MonoBehaviour
             {
                 //走るアニメーションを再生
                 animator.SetBool("Running", true);
+
             }
             else
             {
@@ -116,13 +114,51 @@ public class Player : MonoBehaviour
     private void Update()
     {
         //W・Sキー、↑↓キーで前後移動
-        float v = Input.GetAxisRaw("Vertical") * Time.deltaTime * MAX_VELOCITY_Z;
+        if (Input.GetAxisRaw("Vertical") > 0)
+        {
+            if (velocityZ < MAX_VELOCITY_Z)
+            {
+                velocityZ += ACCELARATION;
+            }
+        }
+        else
+        {
+            if (Math.Abs(velocityZ) > 0.1f)
+            {
+                if (Input.GetAxisRaw("Vertical") < 0)
+                {
+                    velocityZ -= ACCELARATION * 2;
+                }
+                else
+                {
+                    velocityZ -= ACCELARATION;
+                }
+            }
+            else
+            {
+                velocityZ = 0.0f;
+            }
+        }
 
-        //現在の位置＋入力した数値の場所に移動する
-        rb.MovePosition(transform.position + transform.forward*v);
+        //現在の位置＋向いている方向にかかっている速度に移動する
+        rb.MovePosition(transform.position + transform.forward * velocityZ);
 
         //姿勢を変更
-        transform.Rotate(0, Input.GetAxisRaw("Horizontal"), 0, Space.World);
+        transform.Rotate(0, Input.GetAxisRaw("Horizontal") * 2, 0, Space.World);
+
+        //ユニティちゃんの最新の位置から少し前の位置を引いて移動距離を割り出す
+        Vector3 direction = playerPos - transform.position;
+        if (direction.magnitude > 0.001f)
+        {
+            //走るアニメーションを再生
+            animator.SetBool("Running", true);
+
+        }
+        else
+        {
+            //ベクトルの長さがない＝移動していない時は走るアニメーションはオフ
+            animator.SetBool("Running", false);
+        }
 
         //ユニティちゃんの位置を更新する
         playerPos = transform.position;
@@ -143,5 +179,14 @@ public class Player : MonoBehaviour
     void OnCollisionExit(Collision col)
     {
         ground = false;
+    }
+
+    public void SetPosition(Vector3 position, bool velocityContinue)
+    {
+        if (!velocityContinue)
+        {
+            velocityZ = 0.0f;
+        }
+        transform.position = position;
     }
 }
