@@ -4035,6 +4035,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1821238936}
+  sendToClearText: {fileID: 1964602099}
+  clearPanel: {fileID: 1342168760}
 --- !u!4 &1068469781
 Transform:
   m_ObjectHideFlags: 0

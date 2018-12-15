@@ -59,6 +59,7 @@ public class Player : MonoBehaviour
     IEnumerator Jump()
     {
         nowJumpping = true;
+        ground = false;
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         //ジャンプのアニメーションをオンにする
         animator.SetBool("Jumping", true);
@@ -89,7 +90,6 @@ public class Player : MonoBehaviour
     IEnumerator updateMotion()
     {
         var oldPos = Vector3.zero;
-        //移動距離が少しでもあった場合に方向転換
         while (true)
         {
             //ユニティちゃんの最新の位置から少し前の位置を引いて移動距離を割り出す
@@ -148,7 +148,7 @@ public class Player : MonoBehaviour
 
         //ユニティちゃんの最新の位置から少し前の位置を引いて移動距離を割り出す
         Vector3 direction = playerPos - transform.position;
-        if (direction.magnitude > 0.001f)
+        if (velocityZ!=0.0f)
         {
             //走るアニメーションを再生
             animator.SetBool("Running", true);
@@ -156,7 +156,6 @@ public class Player : MonoBehaviour
         }
         else
         {
-            //ベクトルの長さがない＝移動していない時は走るアニメーションはオフ
             animator.SetBool("Running", false);
         }
 
@@ -175,10 +174,13 @@ public class Player : MonoBehaviour
         ground = true;
     }
 
-    //Planeから離れると作動
+    void OnCollisionEnter(Collision col)
+    {
+        MessageBroker.Default.Publish(col);
+    }
     void OnCollisionExit(Collision col)
     {
-        ground = false;
+        MessageBroker.Default.Publish(false);
     }
 
     public void SetPosition(Vector3 position, bool velocityContinue)
