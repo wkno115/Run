@@ -10,11 +10,11 @@ public class Player : MonoBehaviour
     /// <summary>
     /// 加速度
     /// </summary>
-    readonly float ACCELARATION = 0.01f;
+    readonly float ACCELARATION = 0.005f;
     /// <summary>
     /// 最大Z速度
     /// </summary>
-    readonly float MAX_VELOCITY_Z = 1f;
+    readonly float MAX_VELOCITY_Z = 0.5f;
 
     /// <summary>
     /// x,zの速度差分

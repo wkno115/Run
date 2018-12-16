@@ -13,7 +13,11 @@ public class SendToSceneManager : MonoBehaviour {
 	void Update () {
         if (Input.GetKeyDown(KeyCode.R))
         {
+            SceneManager.LoadScene("Title");
+        }
+        if (Input.GetKeyDown(KeyCode.N))
+        {
             SceneManager.LoadScene("Main");
         }
-	}
+    }
 }
